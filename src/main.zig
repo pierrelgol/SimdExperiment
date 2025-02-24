@@ -102,20 +102,20 @@ pub fn Benchmark(comptime FnSignature: type, comptime FnArg: type) type {
             self.total_time_1 = 0;
             self.total_time_2 = 0;
             var test_1_check: u128 = 0;
+            var test_2_check: u128 = 0;
 
-            self.timer.reset();
             for (self.test_cases.items) |*case| {
+                // Measure function_1
+                self.timer.reset();
                 test_1_check += (self.function_1(case) orelse 0);
                 self.total_time_1 += self.timer.lap();
-            }
-            const avg_time_1 = self.total_time_1 / self.total_test;
 
-            var test_2_check: u128 = 0;
-            self.timer.reset();
-            for (self.test_cases.items) |*case| {
+                // Measure function_2
+                self.timer.reset();
                 test_2_check += (self.function_2(case) orelse 0);
                 self.total_time_2 += self.timer.lap();
             }
+            const avg_time_1 = self.total_time_1 / self.total_test;
             const avg_time_2 = self.total_time_2 / self.total_test;
 
             std.debug.print("check 1 : {d}\n", .{test_1_check});
