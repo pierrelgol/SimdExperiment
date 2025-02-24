@@ -20,11 +20,12 @@ fn firstIndexOfScalarSimd(arg: *const TestCase) ?usize {
         }
     }
 
-    return result: while (i < haystack.len) : (i += 1) {
+    while (i < haystack.len) : (i += 1) {
         if (haystack[i] == needle) {
-            break :result i;
+            return i;
         }
-    } else break :result null;
+    }
+    return null;
 }
 
 fn firstIndexOfScalar(arg: *const TestCase) ?usize {
@@ -100,21 +101,25 @@ pub fn Benchmark(comptime FnSignature: type, comptime FnArg: type) type {
         pub fn bench(self: *Self) !void {
             self.total_time_1 = 0;
             self.total_time_2 = 0;
+            var test_1_check: u128 = 0;
 
             self.timer.reset();
             for (self.test_cases.items) |*case| {
-                _ = self.function_1(case);
+                test_1_check += (self.function_1(case) orelse 0);
                 self.total_time_1 += self.timer.lap();
             }
             const avg_time_1 = self.total_time_1 / self.total_test;
 
+            var test_2_check: u128 = 0;
             self.timer.reset();
             for (self.test_cases.items) |*case| {
-                _ = self.function_2(case);
+                test_2_check += (self.function_2(case) orelse 0);
                 self.total_time_2 += self.timer.lap();
             }
             const avg_time_2 = self.total_time_2 / self.total_test;
 
+            std.debug.print("check 1 : {d}\n", .{test_1_check});
+            std.debug.print("check 2 : {d}\n", .{test_2_check});
             std.debug.print("simd block_length for u8 = {d}\n", .{std.simd.suggestVectorLength(u8) orelse 0});
             std.debug.print("Benchmark results:\n", .{});
             std.debug.print("Function 1: Total time = {d} ns, Average time = {d} ns per call\n", .{ self.total_time_1, avg_time_1 });
