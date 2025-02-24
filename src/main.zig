@@ -45,10 +45,14 @@ const TestCase = struct {
     pub fn create(allocator: std.mem.Allocator, random: std.Random, min: usize, max: usize) !TestCase {
         const length = random.uintLessThan(usize, max) + min;
         const buffer = try allocator.alloc(u8, length);
-        random.bytes(buffer);
+        for (0..length) |i| {
+            buffer[i] = random.uintAtMost(u8, 126);
+        }
+        const needle: u8 = 127;
+        buffer[random.uintLessThan(usize, length)] = needle;
         return .{
             .string = buffer,
-            .needle = buffer[random.uintLessThan(usize, length)],
+            .needle = needle,
         };
     }
 
