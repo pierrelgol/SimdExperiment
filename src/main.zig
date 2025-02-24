@@ -111,6 +111,7 @@ pub fn Benchmark(comptime FnSignature: type, comptime FnArg: type) type {
             }
             const avg_time_2 = self.total_time_2 / self.total_test;
 
+            std.debug.print("simd block_length for u8 = {d}\n", .{std.simd.suggestVectorLength(u8) orelse 0});
             std.debug.print("Benchmark results:\n", .{});
             std.debug.print("Function 1: Total time = {d} ns, Average time = {d} ns per call\n", .{ self.total_time_1, avg_time_1 });
             std.debug.print("Function 2: Total time = {d} ns, Average time = {d} ns per call\n", .{ self.total_time_2, avg_time_2 });
@@ -131,6 +132,9 @@ pub fn main() !void {
     var bench = Benchmark(@TypeOf(firstIndexOfScalar), TestCase).init(allocator, firstIndexOfScalar, firstIndexOfScalarSimd);
     defer bench.teardown();
 
-    try bench.setup(10000, 512, 65534);
+    const min = bench.rand.random().uintAtMost(usize, std.math.maxInt(u10));
+    const max = bench.rand.random().uintAtMost(usize, std.math.maxInt(u20));
+    std.debug.print("min length : {d} : max length : {d}\n", .{ min, max });
+    try bench.setup(1000, min, max);
     try bench.bench();
 }
